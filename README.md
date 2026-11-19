@@ -301,8 +301,8 @@ CSE402 requires a team of three. Each member owns one layer of the project.
 | # | Name | ID | Responsibility |
 |---|---|---|---|
 | 1 | **Md. Ragib Shahriyer Soron** | 241337037 | Project lead — domain layer (entities, grading scale, CGPA), UML class diagram, integration and documentation |
-| 2 | _Team member 2 — to be filled in_ | _ID_ | Application layer (`ResultService`, result-sheet export) and the CLI front end |
-| 3 | _Team member 3 — to be filled in_ | _ID_ | Persistence layer (in-memory + SQLite repositories) and the automated test suite |
+| 2 | **Tamanna Akter** | 241020038 | Application layer (`ResultService`, result-sheet export) and the CLI front end (`gradevault.cli`) |
+| 3 | **Konika Tasnim** | 241121037 | Persistence layer (in-memory + SQLite repositories) and the automated test suite |
 
 Each part of the repository is owned end to end: the layer above it is written
 against the interface below it, so the three can be developed in parallel

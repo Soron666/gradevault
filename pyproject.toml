@@ -10,7 +10,9 @@ readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [
-    { name = "Md. Ragib Shahriyer Soron", email = "241337037@cse.ku.ac.bd" },
+    { name = "Md. Ragib Shahriyer Soron" },
+    { name = "Tamanna Akter" },
+    { name = "Konika Tasnim" },
 ]
 keywords = ["education", "result", "cgpa", "grading", "cse402"]
 classifiers = [
