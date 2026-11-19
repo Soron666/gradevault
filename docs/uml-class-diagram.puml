@@ -1,0 +1,277 @@
+@startuml
+'=====================================================================
+' GradeVault - Student Result Manager
+' CSE402 Software Engineering - UML Class Diagram
+'
+' Render with:
+'   java -jar plantuml.jar docs/uml-class-diagram.puml
+' or paste the file into https://www.plantuml.com/plantuml/uml/
+'=====================================================================
+
+title GradeVault - Student Result Manager : UML Class Diagram
+
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam class {
+  BackgroundColor #F7F9FC
+  BorderColor #4B6CB7
+  ArrowColor #4B6CB7
+  FontColor #1F2A44
+}
+skinparam package {
+  BackgroundColor #EEF3FA
+  BorderColor #4B6CB7
+}
+skinparam stereotypeCItalic false
+
+'----------------------------------------------------------------------
+' Domain layer
+'----------------------------------------------------------------------
+package "domain" {
+
+  class Student {
+    - student_id : str
+    - name : str
+    - department : str
+    - semester : int
+    - enrolled_on : date
+    + initials : str
+    + normalise_student_id(s) : str
+  }
+
+  class Course {
+    - code : str
+    - title : str
+    - credit : Decimal
+    + credit_display : str
+    + normalise_course_code(s) : str
+  }
+
+  class Enrollment {
+    - student_id : str
+    - course_code : str
+    - enrolled_on : date
+    + key : tuple
+  }
+
+  class MarkRecord {
+    - student_id : str
+    - course_code : str
+    - mark : Decimal
+    - recorded_at : datetime
+    - recorded_by : str
+    + key : tuple
+  }
+
+  class GradeBand {
+    - letter : str
+    - point : Decimal
+    - lower : int
+    - upper : int
+    + contains(mark) : bool
+  }
+
+  class GradeScale {
+    - bands : tuple[GradeBand]
+    + band_for(mark) : GradeBand
+    + letter_for(mark) : str
+    + point_for(mark) : Decimal
+    + classify(mark) : tuple
+    + as_table() : tuple
+  }
+
+  class CourseOutcome {
+    - course : Course
+    - mark : Decimal
+    - grade : str
+    - point : Decimal
+    + credit : Decimal
+    + is_graded : bool
+    + weighted_points : Decimal
+    + mark_display : str
+  }
+
+  class Transcript {
+    - student : Student
+    - outcomes : tuple[CourseOutcome]
+    - cgpa : Decimal
+    - total_credits : Decimal
+    - attempted_credits : Decimal
+    + graded_outcomes : tuple
+    + pending_outcomes : tuple
+    + passed : bool
+    + failed_courses : tuple
+    + letter_summary : str
+    + build(...) : Transcript
+  }
+
+  class GradeVaultError {
+    <<exception>>
+  }
+
+  class ValidationError {
+    <<exception>>
+  }
+
+  class DuplicateStudentError {
+    <<exception>>
+  }
+
+  class DuplicateCourseError {
+    <<exception>>
+  }
+
+  class InvalidMarkError {
+    <<exception>>
+  }
+
+  class EntityNotFoundError {
+    <<exception>>
+  }
+
+  class StudentNotFoundError {
+    <<exception>>
+  }
+
+  class CourseNotFoundError {
+    <<exception>>
+  }
+
+  class NotEnrolledError {
+    <<exception>>
+  }
+}
+
+'----------------------------------------------------------------------
+' Application layer
+'----------------------------------------------------------------------
+package "application" {
+
+  class ResultService {
+    - repository : GradeVaultRepository
+    - scale : GradeScale
+    - clock : Callable
+    + add_student(...) : Student
+    + add_course(...) : Course
+    + enroll(...) : Enrollment
+    + record_mark(...) : MarkRecord
+    + result_sheet(...) : Transcript
+    + result_sheets() : list
+    + course_statistics(...) : CourseStatistics
+    + list_students() : list
+    + list_courses() : list
+  }
+
+  class CourseStatistics {
+    - course : Course
+    - students_graded : int
+    - average : Decimal
+    - highest : Decimal
+    - lowest : Decimal
+    - pass_count : int
+    - fail_count : int
+    + pass_rate : Decimal
+  }
+
+  class ResultSheetExporter {
+    <<module>>
+    + result_sheet_text(transcript) : str
+    + result_sheet_csv(transcript) : str
+    + transcript_summary(transcript) : list
+  }
+}
+
+'----------------------------------------------------------------------
+' Infrastructure layer
+'----------------------------------------------------------------------
+package "infrastructure" {
+
+  interface GradeVaultRepository {
+    <<interface>>
+    + add_student(student) : None
+    + get_student(id) : Student
+    + list_students() : list
+    + add_course(course) : None
+    + get_course(code) : Course
+    + list_courses() : list
+    + enroll(enrollment) : None
+    + is_enrolled(id, code) : bool
+    + list_enrollments(id) : list
+    + save_mark(record) : None
+    + get_mark(id, code) : MarkRecord
+    + list_marks(id) : list
+    + enrolled_courses(id) : list
+  }
+
+  class InMemoryRepository {
+    - _students : dict
+    - _courses : dict
+    - _enrollments : dict
+    - _marks : dict
+  }
+
+  class SqliteRepository {
+    - database : str
+    - _connection : Connection
+  }
+
+  class DemoSeeder {
+    <<module>>
+    + seed_demo_data(service) : dict
+  }
+}
+
+'----------------------------------------------------------------------
+' CLI layer
+'----------------------------------------------------------------------
+package "cli" {
+  class GradeVaultCLI {
+    <<module>>
+    + main(argv) : int
+    + build_parser() : ArgumentParser
+  }
+}
+
+'----------------------------------------------------------------------
+' Relationships
+'----------------------------------------------------------------------
+Student "1" <-- "0..*" Enrollment : enrols in >
+Course  "1" <-- "0..*" Enrollment : is taken by >
+Student "1" <-- "0..*" MarkRecord : receives >
+Course  "1" <-- "0..*" MarkRecord : is graded by >
+
+CourseOutcome --> Course : belongs to >
+CourseOutcome --> GradeBand : derived from >
+Transcript "1" --> "1" Student : belongs to >
+Transcript "1" *-- "0..*" CourseOutcome : contains >
+GradeScale "1" *-- "1..*" GradeBand : consists of >
+
+ResultService --> Student : manages >
+ResultService --> Course : manages >
+ResultService --> Enrollment : manages >
+ResultService --> MarkRecord : records >
+ResultService --> GradeScale : applies >
+ResultService --> Transcript : produces >
+ResultService --> CourseStatistics : computes >
+ResultService ..> GradeVaultRepository : stores in >
+
+ResultSheetExporter --> Transcript : renders >
+
+InMemoryRepository ..|> GradeVaultRepository
+SqliteRepository ..|> GradeVaultRepository
+
+GradeVaultCLI --> ResultService : calls >
+GradeVaultCLI --> ResultSheetExporter : prints via >
+
+DemoSeeder ..> ResultService : fills >
+
+GradeVaultError <|-- ValidationError
+GradeVaultError <|-- EntityNotFoundError
+ValidationError <|-- DuplicateStudentError
+ValidationError <|-- DuplicateCourseError
+ValidationError <|-- InvalidMarkError
+EntityNotFoundError <|-- StudentNotFoundError
+EntityNotFoundError <|-- CourseNotFoundError
+GradeVaultError <|-- NotEnrolledError
+
+@enduml

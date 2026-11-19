@@ -1,0 +1,9 @@
+# GradeVault runtime requirements
+#
+# GradeVault itself has NO third-party dependencies - it runs on the Python
+# standard library alone (sqlite3 for storage, argparse for the CLI,
+# decimal for exact CGPA arithmetic).
+#
+# The packages below are only needed to run the test suite.
+pytest>=7.4
+pytest-cov>=4.1

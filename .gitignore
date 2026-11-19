@@ -1,0 +1,43 @@
+# Byte-compiled / optimised files
+__pycache__/
+*.py[cod]
+*.so
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.ruff_cache/
+.mypy_cache/
+
+# Local databases created while playing with the app
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+gradevault.db
+
+# Editors / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Exported result sheets produced during local testing
+out/
+result_sheet*.csv
+result_sheet*.txt

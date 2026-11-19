@@ -1,0 +1,13 @@
+# Keep line endings stable across Windows and Linux contributors.
+* text=auto eol=lf
+
+*.py   text eol=lf
+*.md   text eol=lf
+*.toml text eol=lf
+*.yml  text eol=lf
+*.puml text eol=lf
+*.svg  text eol=lf
+
+*.png binary
+*.jpg binary
+*.db  binary
